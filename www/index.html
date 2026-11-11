@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>وِردي – مراجعة الحفظ اليومية</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Amiri&display=swap">
+<style>
+:root{--bg:#f6f3ea;--card:#fff;--ink:#1f2a24;--mute:#6b766f;--acc:#1f7a5a;--acc2:#e3f2ec;--warn:#b7791f;--bad:#c0392b;--line:#e2ddcf;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121815;--card:#1b2420;--ink:#e8efe9;--mute:#97a39b;--acc:#4cc59a;--acc2:#1f3a30;--warn:#e0b04f;--bad:#e5786b;--line:#2b3731;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121815;--card:#1b2420;--ink:#e8efe9;--mute:#97a39b;--acc:#4cc59a;--acc2:#1f3a30;--warn:#e0b04f;--bad:#e5786b;--line:#2b3731;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,"Segoe UI",Tahoma,sans-serif;line-height:1.7;padding-bottom:84px}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 2px}h2{font-size:1.1rem;margin:0 0 8px}
+.sub{color:var(--mute);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--acc2);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:1.3rem;color:var(--acc)}.stat span{font-size:.78rem;color:var(--mute)}
+.rng{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin:8px 0}
+.rng a{color:var(--acc);text-decoration:none;font-size:.85rem;white-space:nowrap}
+.rng b{font-size:1.02rem}
+button{font-family:inherit;font-size:1rem;border:0;border-radius:12px;padding:11px 16px;cursor:pointer;background:var(--acc);color:#fff;font-weight:600}
+button.ghost{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+button.sm{padding:6px 12px;font-size:.85rem}
+button:disabled{opacity:.5}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.rate button.g{background:var(--acc)}.rate button.m{background:var(--warn)}.rate button.w{background:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:300px;overflow-y:auto;padding:4px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 10px;font-size:.85rem;font-weight:400}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+input,select{font-family:inherit;font-size:1rem;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+.bar{height:10px;border-radius:99px;background:var(--acc2);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.day{aspect-ratio:1;border-radius:8px;background:var(--acc2);font-size:.7rem;display:flex;align-items:center;justify-content:center;color:var(--mute)}
+.day.g{background:var(--acc);color:#fff}.day.m{background:var(--warn);color:#fff}.day.w{background:var(--bad);color:#fff}
+.day.t{outline:2px solid var(--ink)}
+nav{position:fixed;inset:auto 0 0 0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;background:transparent;color:var(--mute);border-radius:0;padding:12px 2px;font-size:.78rem}
+nav button.on{color:var(--acc);box-shadow:inset 0 -3px 0 var(--acc)}
+.ok{text-align:center;padding:10px;color:var(--acc);font-weight:700}
+.hide{display:none}
+.ay{font-family:Amiri,"Traditional Arabic",serif;font-size:var(--fz,1.3rem);line-height:2.1}.mk{cursor:pointer;color:var(--warn);font-size:1.1rem;padding:0 4px}.hid{filter:blur(7px);cursor:pointer}.hid.show{filter:none}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav><button data-t="today" class="on">اليوم</button><button data-t="mem">محفوظاتي</button><button data-t="exam">اختبار</button><button data-t="read">المصحف</button><button data-t="prog">تقدّمي</button></nav>
+<script>
+var N=["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+var C=[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+var KEY="wird_v1";
+function fresh(){return{mem:[],juz:[],parts:[],nlog:[],per:20,order:"asc",ptr:0,hist:{},weak:[],tab:"today",cyc:0,quiz:{ok:0,n:0}}}
+var S=fresh();
+try{var raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function ar(n){return Number(n).toLocaleString("ar-EG")}
+function dk(d){d=d||new Date();return d.toLocaleDateString("en-CA")}
+var ALL=[];for(var si=1;si<=114;si++)for(var ai=1;ai<=C[si-1];ai++)ALL.push(si*1000+ai);
+var JS=[[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]].map(function(x){return ALL.indexOf(x[0]*1000+x[1])});
+JS.push(ALL.length);
+function opts(){return N.map(function(n,i){return '<option value="'+(i+1)+'">'+n+'</option>'}).join("")}
+function flat(){
+  var set={};
+  S.mem.forEach(function(s){for(var a=1;a<=C[s-1];a++)set[s*1000+a]=1});
+  S.juz.forEach(function(j){ALL.slice(JS[j-1],JS[j]).forEach(function(v){set[v]=1})});
+  S.parts.forEach(function(p){for(var a=p.from;a<=p.to;a++)set[p.s*1000+a]=1});
+  return Object.keys(set).map(Number).sort(function(x,y){
+    var sx=Math.floor(x/1000),sy=Math.floor(y/1000);
+    if(sx!==sy)return S.order==="desc"?sy-sx:sx-sy;
+    return x-y});
+}
+function ranges(f){
+  var out=[],cur=null;
+  f.forEach(function(v){var s=Math.floor(v/1000),a=v%1000;
+    if(cur&&cur.s===s&&a===cur.to+1)cur.to=a;else{cur={s:s,from:a,to:a};out.push(cur)}});
+  return out;
+}
+function portion(){
+  var f=flat();if(!f.length)return[];
+  var n=Math.min(S.per,f.length),p=S.ptr%f.length,sl=[];
+  for(var i=0;i<n;i++)sl.push(f[(p+i)%f.length]);
+  return ranges(sl);
+}
+function cnt(r){return r.to-r.from+1}
+function rtxt(r){return "سورة "+N[r.s-1]+" : "+ar(r.from)+(r.to>r.from?" – "+ar(r.to):"")}
+function link(r){return "https://quran.com/"+r.s+":"+r.from}
+function rhtml(r){return '<div class="rng"><b>'+rtxt(r)+'</b><a href="'+link(r)+'" target="_blank" rel="noopener">افتح المصحف ↗</a></div>'}
+function streak(){
+  var d=new Date(),c=0;
+  if(!S.hist[dk(d)])d.setDate(d.getDate()-1);
+  while(S.hist[dk(d)]){c++;d.setDate(d.getDate()-1)}
+  return c;
+}
+function total(){return flat().length}
+function done(rate){
+  var today=dk(),wasDone=S.hist[today];if(wasDone)return;
+  var p=portion(),tot=total(),n=0;
+  p.forEach(function(r){n+=cnt(r)});
+  var oldWeak=S.weak;S.weak=[];
+  if(rate==="w"){p.forEach(function(r){S.weak.push(r)})}
+  S.hist[today]={r:rate,n:n+oldWeak.reduce(function(a,r){return a+cnt(r)},0)};
+  p.forEach(function(r){bump(r.s,rate==="g"?1:rate==="w"?-1:0)});
+  if(S.ptr+Math.min(S.per,tot)>=tot)S.cyc=(S.cyc||0)+1;
+  S.ptr=(S.ptr+Math.min(S.per,tot))%tot;
+  save();render();
+}
+function undo(){
+  var t=dk(),h=S.hist[t];if(!h)return;
+  var tot=total();delete S.hist[t];
+  if(S.ptr-Math.min(S.per,tot)<0&&S.cyc>0)S.cyc--;
+  S.ptr=(S.ptr-Math.min(S.per,tot)+tot)%tot;
+  save();render();
+}
+function vToday(){
+  var el="",tot=total(),t=dk(),h=S.hist[t];
+  var hd=new Date().toLocaleDateString("ar-EG",{weekday:"long",day:"numeric",month:"long"});
+  el+='<h1>وِردي اليومي</h1><div class="sub">'+hd+'</div>';
+  el+='<div class="card"><div class="stats"><div class="stat"><b>'+ar(streak())+'</b><span>أيام متتالية 🔥</span></div><div class="stat"><b>'+ar(Object.keys(S.hist).length)+'</b><span>أيام الورد</span></div><div class="stat"><b>'+ar(S.per)+'</b><span>آية يوميًا</span></div></div></div>';
+  if(!tot){
+    el+='<div class="card"><h2>ابدأ من هنا</h2><p>اختر السور التي حفظتها من تبويب «محفوظاتي» وسأرتّب لك ورد المراجعة اليومي تلقائيًا.</p><button data-go="mem">اختيار المحفوظات</button></div>';
+    return el;
+  }
+  if(S.weak.length&&!h){
+    el+='<div class="card" style="border-color:var(--bad)"><h2>🔁 تثبيت: مواضع ضعيفة من الأمس</h2>';
+    S.weak.forEach(function(r){el+=rhtml(r)});el+='</div>';
+  }
+  var p=portion();
+  el+='<div class="card"><h2>📖 وردك اليوم</h2><div class="sub">'+ar(Math.min(S.per,tot))+' آية من محفوظاتك</div>';
+  p.forEach(function(r){el+=rhtml(r)});
+  if(T)el+='<button class="ghost sm" data-wt="1" style="margin-top:8px">'+['📖 عرض نص الورد (مخفي للتسميع)','👁 إظهار الكل','إغلاق النص'][S.wt||0]+'</button>'+(S.wt?wirdText(p):'');
+  if(h){
+    var lbl={g:"ممتاز",m:"جيد",w:"يحتاج تثبيت"}[h.r];
+    el+='<div class="ok">✅ أتممت ورد اليوم — التقييم: '+lbl+'</div><div style="text-align:center"><button class="ghost sm" data-undo="1">تراجع</button></div>';
+  }else{
+    el+='<div class="sub" style="margin-top:10px">راجع الورد من حفظك دون النظر، ثم قيّم نفسك بصدق:</div><div class="rate"><button class="g" data-rate="g">ممتاز</button><button class="m" data-rate="m">جيد</button><button class="w" data-rate="w">ضعيف</button></div>';
+  }
+  el+='</div>';
+  return el;
+}
+var E={phase:"setup",scope:"all",n:10,mode:"mix",auto:true,qs:[],i:0,score:0,miss:[],fb:null,t0:0,spoken:-1},TM=null;
+function val(id){return document.getElementById(id).value}
+function say(t){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";speechSynthesis.speak(u)}catch(e){}}
+function rnd(n){return Math.floor(Math.random()*n)}
+function shuf(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t}return a}
+function scopeList(){
+  var o=[];
+  if(E.scope==="today"){portion().forEach(function(r){for(var a=r.from;a<=r.to;a++)o.push(r.s*1000+a)});return o}
+  if(E.scope==="hard")return(S.hard||[]).slice();
+  if(E.scope==="weak"){var f3=flat(),st={},ids=[];f3.forEach(function(v){var s=Math.floor(v/1000);if(!st[s]){st[s]=1;ids.push(s)}});ids.sort(function(a,b){return((S.str||{})[a]||0)-((S.str||{})[b]||0)});var keep={};ids.slice(0,5).forEach(function(s){keep[s]=1});return f3.filter(function(v){return keep[Math.floor(v/1000)]})}
+  if(E.scope==="new"){(S.nlog||[]).slice(-5).forEach(function(r){for(var a=r.from;a<=r.to;a++)o.push(r.s*1000+a)});return o}
+  var f=flat();
+  if(E.scope.charAt(0)==="s"){var sn=+E.scope.slice(1);return f.filter(function(v){return Math.floor(v/1000)===sn})}
+  return f;
+}
+var LS=0;
+function mkQ(kind,L,set){var q=mkQ0(kind,L,set);q.s=LS;return q}
+function mkQ0(kind,L,set){
+  var v=L[rnd(L.length)],s=Math.floor(v/1000),a=v%1000;LS=s;
+  if(kind==="next"&&!set[v+1])kind="rec";
+  if(kind==="rec"){var b=a,len=3+rnd(5);while(b-a<len-1&&set[s*1000+b+1])b++;
+    var t="سمّع من سورة "+N[s-1]+" من الآية "+ar(a)+" إلى الآية "+ar(b);
+    return{t:"o",txt:t,say:t,r:{s:s,from:a,to:b}}}
+  if(kind==="next"){var t2="اقرأ الآية التي تلي الآية "+ar(a)+" من سورة "+N[s-1]+" وأكمل ثلاث آيات";
+    return{t:"o",txt:t2,say:t2,r:{s:s,from:a+1,to:Math.min(a+3,C[s-1])}}}
+  if(kind==="cnt"){var c=C[s-1],o=[c];while(o.length<4){var x=c+rnd(11)-5;if(x>0&&o.indexOf(x)<0)o.push(x)}
+    o=shuf(o);var q="كم عدد آيات سورة "+N[s-1]+"؟";
+    return{t:"m",txt:q,say:q,opts:o.map(ar),ans:o.indexOf(c)}}
+  if(kind==="num"){var o4=numOpts(s,114),qn="ما رقم سورة "+N[s-1]+" في ترتيب المصحف؟";return{t:"m",txt:qn,say:qn,opts:o4.map(ar),ans:o4.indexOf(s)}}
+  if(kind==="nth"){var qh="ما اسم السورة رقم "+ar(s)+"؟",o5=[N[s-1]];while(o5.length<4){var z=N[rnd(114)];if(o5.indexOf(z)<0)o5.push(z)}o5=shuf(o5);return{t:"m",txt:qh,say:qh,opts:o5,ans:o5.indexOf(N[s-1])}}
+  if(kind==="prev"){if(s===1)s=2;LS=s;var qp="ما السورة التي تأتي قبل سورة "+N[s-1]+" في المصحف؟",o6=[N[s-2]];while(o6.length<4){var z2=N[rnd(114)];if(o6.indexOf(z2)<0&&z2!==N[s-1])o6.push(z2)}o6=shuf(o6);return{t:"m",txt:qp,say:qp,opts:o6,ans:o6.indexOf(N[s-2])}}
+  if(kind==="juz"){var ix=ALL.indexOf(s*1000+1),jz=1;for(var k=0;k<30;k++)if(JS[k]<=ix)jz=k+1;var qj="في أي جزء تبدأ سورة "+N[s-1]+"؟",o7=numOpts(jz,30);return{t:"m",txt:qj,say:qj,opts:o7.map(ar),ans:o7.indexOf(jz)}}
+  if(kind==="long"){var ss=[s],used={};used[C[s-1]]=1;while(ss.length<4){var y2=1+rnd(114);if(!used[C[y2-1]]){used[C[y2-1]]=1;ss.push(y2)}}ss=shuf(ss);var mx=0;ss.forEach(function(x,i){if(C[x-1]>C[ss[mx]-1])mx=i});var ql="أي هذه السور أكثر عددًا في الآيات؟";return{t:"m",txt:ql,say:ql,opts:ss.map(function(x){return N[x-1]}),ans:mx}}
+  if(s===114)s=113;
+  var q2="ما السورة التي تأتي بعد سورة "+N[s-1]+" في المصحف؟",o3=[N[s]];
+  while(o3.length<4){var y=N[rnd(114)];if(o3.indexOf(y)<0&&y!==N[s-1])o3.push(y)}
+  o3=shuf(o3);return{t:"m",txt:q2,say:q2,opts:o3,ans:o3.indexOf(N[s])}
+}
+function xnext(){E.fb=null;E.i++;if(E.i>=E.n)xfinish();else{E.t0=Date.now();render()}}
+function xfinish(){
+  E.phase="done";var seen={};
+  E.miss.forEach(function(r){var k=r.s+":"+r.from;if(!seen[k]){seen[k]=1;S.weak.push(r)}});
+  S.weak=S.weak.slice(-8);
+  S.exams=(S.exams||[]).concat([{d:dk(),sc:E.score,n:E.n}]).slice(-20);
+  try{speechSynthesis.cancel()}catch(e){}
+  save();render();
+}
+function vExam(){
+  var el='<h1>الاختبار الشفوي</h1>';
+  if(E.phase==="setup"){
+    el+='<div class="sub">أنا المُمتحِن: أسألك بصوتي، وتجيب بصوتك من حفظك، ثم تقيّم نفسك بصدق</div>';
+    if(!total())return el+'<div class="card"><p>اختر محفوظاتك أولًا.</p><button data-go="mem">اختيار المحفوظات</button></div>';
+    el+='<div class="card"><label class="sub">نطاق الاختبار</label><select id="xs"><option value="all">كل المحفوظ</option><option value="today">ورد اليوم</option><option value="hard">الآيات الصعبة ★</option><option value="weak">الأضعف حفظًا (٥ سور)</option><option value="new">آخر حفظ جديد</option>';
+    var seen={};flat().forEach(function(v){var s=Math.floor(v/1000);if(!seen[s]){seen[s]=1;el+='<option value="s'+s+'">سورة '+N[s-1]+'</option>'}});
+    el+='</select><label class="sub" style="display:block;margin-top:10px">نوع الأسئلة</label><select id="xm"><option value="mix">اختيار من متعدد (كل الأنواع)</option><option value="mixold" style="display:none">مختلط</option><option value="oral">تسميع فقط</option><option value="know">أسئلة معرفة (عدد الآيات والترتيب)</option></select><label class="sub" style="display:block;margin-top:10px">عدد الأسئلة</label><select id="xn"><option value="5">٥</option><option value="10">١٠</option><option value="15">١٥</option><option value="20">٢٠</option></select><label style="display:block;margin-top:10px"><input id="xa" type="checkbox" style="width:auto"> قراءة السؤال بصوت عالٍ</label><button data-xstart="1" style="margin-top:12px;width:100%">ابدأ الاختبار</button><div id="xmsg" class="sub" style="color:var(--bad)"></div>'+(T?'':'<div class="sub">💡 لتفعيل أسئلة «أكمل الآية» و«ما الآية التالية» استورد نص المصحف من تبويب «المصحف».</div>')+'</div>';
+    var hx=(S.exams||[]).slice(-5).reverse();
+    if(hx.length){el+='<div class="card"><h2>آخر اختباراتك</h2>';hx.forEach(function(x){el+='<div class="sub">• '+x.d+' — '+ar(x.sc)+' من '+ar(x.n)+' ('+ar(Math.round(x.sc/x.n*100))+'٪)</div>'});el+='</div>'}
+    return el;
+  }
+  if(E.phase==="done"){
+    var pct=E.n?Math.round(E.score/E.n*100):0;
+    var gr=pct>=90?"ممتاز — ما شاء الله":pct>=75?"جيد جدًا":pct>=60?"جيد":"تحتاج مزيدًا من المراجعة";
+    el+='<div class="card"><div class="ok" style="font-size:1.8rem">'+ar(E.score)+' / '+ar(E.n)+'</div><div class="ok">'+ar(pct)+'٪ — '+gr+'</div>';
+    if(E.miss.length){el+='<h2>مواضع تحتاج تثبيت</h2>';E.miss.forEach(function(r){el+=rhtml(r)});el+='<div class="sub">أُضيفت إلى ورد التثبيت في صفحة «اليوم»</div>'}
+    el+='<button data-xnew="1" style="margin-top:12px;width:100%">اختبار جديد</button></div>';
+    return el;
+  }
+  var q=E.qs[E.i];
+  el+='<div class="bar"><i style="width:'+Math.round(E.i/E.n*100)+'%"></i></div><div class="sub" style="margin:6px 0">السؤال '+ar(E.i+1)+' من '+ar(E.n)+' — النتيجة: '+ar(E.score)+'</div>';
+  el+='<div class="card"><h2 style="font-size:1.3rem">'+q.txt+'</h2><div class="row"><button class="ghost sm" data-say="1">🔊 اسمع السؤال</button><span class="sub" id="tm">٠ ث</span></div>';
+  if(q.t==="o"){
+    el+='<div class="rng"><span class="sub">جاوب بصوتك من حفظك دون النظر</span><a href="'+link(q.r)+'" target="_blank" rel="noopener">تحقق ↗</a></div><div class="rate"><button class="g" data-g="1">أتقنتها</button><button class="m" data-g="0.5">تردّدت</button><button class="w" data-g="0">أخطأت</button></div>';
+  }else{
+    q.opts.forEach(function(o,i){
+      var st="";
+      if(E.fb){if(i===q.ans)st=' style="background:var(--acc);color:#fff"';else if(i===E.fb.pick)st=' style="background:var(--bad);color:#fff"'}
+      el+='<button class="ghost" data-pick="'+i+'"'+(E.fb?' disabled':'')+st+' style="width:100%;margin-top:8px">'+o+'</button>';
+    });
+    if(E.fb)el+='<div class="ok">'+(E.fb.pick===q.ans?"✅ إجابة صحيحة":"❌ الصحيح: "+q.opts[q.ans])+'</div><button data-xnext="1" style="width:100%">التالي</button>';
+  }
+  if(q.r&&E.fb)el+='<div class="rng"><span class="sub">راجع الموضع في المصحف</span><a href="'+link(q.r)+'" target="_blank" rel="noopener">افتح ↗</a></div>';
+  el+='</div><div style="text-align:center"><button class="ghost sm" data-xend="1">إنهاء الاختبار</button></div>';
+  return el;
+}
+var T=null,TOK=true,R={s:(S.rd||1),hide:false,q:""};
+try{var tr=localStorage.getItem("wird_text");if(tr)T=JSON.parse(tr)}catch(e){}
+function bump(s,d){S.str=S.str||{};S.str[s]=Math.max(0,Math.min(5,(S.str[s]||0)+d))}
+function nz(t){return t.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g,"").replace(/[ٱإأآ]/g,"ا")}
+function parseT(str){
+  var m={},n=0;
+  str.split(/\r?\n/).forEach(function(l){
+    l=l.replace(/^\uFEFF/,"");
+    if(!l||l.charAt(0)==="#")return;
+    var p=l.split("|");if(p.length<3)return;
+    var s=+p[0],a=+p[1];if(!s||!a||s>114)return;
+    var t=p.slice(2).join("|").trim();
+    if(a===1&&s!==1&&s!==9){var w=t.split(" ");if(w.length>4&&nz(w.slice(0,4).join(" "))==="بسم الله الرحمن الرحيم")t=w.slice(4).join(" ")}
+    m[s*1000+a]=t;n++});
+  return n>=6200?m:null;
+}
+function impT(str){
+  var m=parseT(str),msg=document.getElementById("tmsg");
+  if(!m){if(msg)msg.textContent="الملف غير مطابق: يلزم نص القرآن كاملًا بصيغة رقم_السورة|رقم_الآية|النص";return}
+  T=m;TOK=true;try{localStorage.setItem("wird_text",JSON.stringify(m))}catch(e){TOK=false}
+  render();
+}
+function importCard(){
+  return '<div class="card"><h2>'+(T?'✅ نص المصحف مُحمَّل':'استيراد نص المصحف')+'</h2><div class="sub">'+(T?(TOK?'محفوظ على جهازك ويعمل بدون إنترنت.':'محفوظ للجلسة الحالية فقط (مساحة التخزين ممتلئة).'):'لتشغيل قراءة المصحف والأسئلة النصية حمّل ملف نص القرآن مرة واحدة: افتح <a href="https://tanzil.net/download" target="_blank" rel="noopener" style="color:var(--acc)">tanzil.net/download</a> واختر النص بصيغة «Text (with aya numbers)»، ثم اختر الملف هنا.')+'</div><input id="fi" type="file" accept=".txt,text/plain" style="margin-top:8px"><div class="sub" style="margin-top:8px">أو الصق النص كاملًا:</div><textarea id="ft" rows="2" style="width:100%;font-size:.8rem;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px"></textarea><button class="ghost sm" style="margin-top:6px" data-timp="1">استيراد من النص الملصق</button><div id="tmsg" class="sub" style="color:var(--bad)"></div></div>';
+}
+function vRead(){
+  var el='<h1>المصحف</h1>';
+  if(T){
+    el+=searchCard();
+    el+='<div class="card"><div class="row" style="flex-wrap:nowrap"><button class="ghost sm" data-rn="-1">▶ السابقة</button><select id="rs" style="flex:1">'+opts()+'</select><button class="ghost sm" data-rn="1">التالية ◀</button></div><label style="display:block;margin-top:10px"><input id="rh" type="checkbox" style="width:auto"> إخفاء الآيات للتسميع (اضغط الآية لإظهارها)</label><button class="ghost sm" style="margin-top:8px" data-rm="1">'+(S.mem.indexOf(R.s)>-1?'إزالة من محفوظاتي':'إضافة إلى محفوظاتي')+'</button> <a href="https://quran.com/'+R.s+'" target="_blank" rel="noopener" style="color:var(--acc);font-size:.85rem">افتح في quran.com ↗</a></div>';
+    el+='<div class="card"><h2>سورة '+N[R.s-1]+' — '+ar(C[R.s-1])+' آية</h2><div>';
+    for(var a=1;a<=C[R.s-1];a++)el+=mkb(R.s*1000+a)+'<span id="ay'+(R.s*1000+a)+'" class="ay'+(R.hide?' hid':'')+'">'+T[R.s*1000+a]+' ﴿'+ar(a)+'﴾ </span>';
+    el+='</div></div>';
+  }else el+='<div class="card"><p>قراءة المصحف داخل التطبيق والأسئلة النصية تحتاج نص القرآن، ويُحمَّل مرة واحدة من الأسفل.</p></div>';
+  return el+(TB?'<div class="sub" style="text-align:center">نص المصحف: مشروع Tanzil (CC BY 3.0)</div>':importCard());
+}
+function strCard(){
+  var ids={},o=[];flat().forEach(function(v){ids[Math.floor(v/1000)]=1});
+  Object.keys(ids).forEach(function(s){o.push({s:+s,l:(S.str||{})[s]||0})});
+  if(!o.length)return"";
+  o.sort(function(a,b){return a.l-b.l||a.s-b.s});
+  var el='<div class="card"><h2>قوة الحفظ لكل سورة</h2><div class="sub">ترتفع مع الإجابات الصحيحة وتنخفض مع الأخطاء — الأضعف أولًا</div>';
+  o.slice(0,12).forEach(function(x){el+='<div class="row" style="margin:6px 0"><span>'+N[x.s-1]+'</span><span style="letter-spacing:2px;color:var(--acc)">'+"★".repeat(x.l)+"☆".repeat(5-x.l)+'</span></div>'});
+  return el+'</div>';
+}
+function numOpts(c,max){var o=[c];while(o.length<4){var x=c+rnd(9)-4;if(x>0&&x<=max&&o.indexOf(x)<0)o.push(x)}return shuf(o)}
+function wc(v){return T&&T[v]?T[v].split(" ").length:0}
+function cut(t,n){var w=t.split(" ");return w.length>n?w.slice(0,n).join(" ")+" …":t}
+function pickT(L,ok){for(var i=0;i<60;i++){var v=L[rnd(L.length)];if(ok(v))return v}return 0}
+function dis(L,total,f,seed){var o=seed.slice(),i=0;while(o.length<total&&i++<300){var tx=f(i>80?ALL[rnd(ALL.length)]:L[rnd(L.length)]);if(tx&&o.indexOf(tx)<0)o.push(tx)}return o}
+function mkT(kind,L,set){
+  var ok=kind==="tnext"?function(v){return set[v+1]&&wc(v)<=30&&wc(v+1)<=30}:kind==="tprev"?function(v){return set[v-1]&&wc(v)<=30&&wc(v-1)<=30}:function(v){return wc(v)>=6&&wc(v)<=30};
+  var v=pickT(L,ok);if(!v)return null;
+  var s=Math.floor(v/1000),a=v%1000,r={s:s,from:a,to:a},say,cor,o,shown;
+  if(kind==="tsur"){say="من أي سورة هذه الآية؟";cor=N[s-1];shown=cut(T[v],25);o=dis(ALL,4,function(x){return N[Math.floor(x/1000)-1]},[cor])}
+  else if(kind==="tbeg"){var w2=T[v].split(" "),h2=Math.floor(w2.length/2),sw=function(x){var ww=T[x]?T[x].split(" "):[];return ww.length>=6&&ww.length<=30?ww.slice(0,Math.min(Math.ceil(ww.length/2),8)).join(" ")+" …":null};say="ما بداية هذه الآية؟";shown="… "+w2.slice(h2).join(" ");cor=sw(v);o=dis(L,4,sw,[cor])}
+  else if(kind==="tcomp"){var w=T[v].split(" "),h=Math.ceil(w.length/2);say="أكمل الآية التالية";cor=cut(w.slice(h).join(" "),10);shown=w.slice(0,h).join(" ")+" …";
+    o=dis(L,4,function(x){var ww=T[x]?T[x].split(" "):[];return ww.length>=6&&ww.length<=30?cut(ww.slice(Math.ceil(ww.length/2)).join(" "),10):null},[cor])}
+  else{var nv=kind==="tnext"?v+1:v-1;say=kind==="tnext"?"ما الآية التي تلي هذه الآية؟":"ما الآية التي تسبق هذه الآية؟";shown=cut(T[v],18);cor=cut(T[nv],12);r={s:s,from:nv%1000,to:nv%1000};
+    o=dis(L,4,function(x){return T[x]?cut(T[x],12):null},[cor])}
+  if(o.length<2)return null;o=shuf(o);
+  return{t:"m",s:s,r:r,say:say,txt:say+'<div class="ay">﴿'+shown+'﴾</div>',opts:o,ans:o.indexOf(cor)}
+}
+var KN=["cnt","ord","num","nth","prev","juz","long"],KT=["tcomp","tbeg","tnext","tcomp","tbeg","tprev","tsur"];
+function pickQ(i,L,set){
+  var q=null;
+  if(E.mode==="oral")return mkQ(i%2?"next":"rec",L,set);
+  if(T&&E.mode==="mix"){for(var tr2=0;tr2<4&&!q;tr2++)q=mkT(KT[rnd(KT.length)],L,set)}
+  return q||(E.mode==="know"?mkQ(KN[rnd(KN.length)],L,set):mkQ(i%2?"next":"rec",L,set));
+}
+function mkb(v){return '<span class="mk" data-hv="'+v+'">'+(S.hard&&S.hard.indexOf(v)>-1?'★':'☆')+'</span>'}
+function wirdText(p){
+  var el='<div style="margin-top:8px">';
+  p.forEach(function(r){
+    el+='<div class="sub" style="margin-top:6px"><b>'+rtxt(r)+'</b></div><div>';
+    for(var a=r.from;a<=r.to;a++){var v=r.s*1000+a;el+=mkb(v)+'<span class="ay'+(S.wt===1?' hid':'')+'">'+T[v]+' ﴿'+ar(a)+'﴾ </span>'}
+    el+='</div>'});
+  return el+'</div>';
+}
+function srch(q){
+  var nq=nz(q).replace(/ى/g,"ي").trim();
+  if(nq.length<2)return[];
+  var o=[];
+  for(var i=0;i<ALL.length&&o.length<30;i++){var v=ALL[i];if(T[v]&&nz(T[v]).replace(/ى/g,"ي").indexOf(nq)>-1)o.push(v)}
+  return o;
+}
+function searchCard(){
+  var el='<div class="card"><div class="row"><h2 style="margin:0">🔍 بحث في المصحف</h2><span><button class="ghost sm" data-fz="-1">A−</button> <button class="ghost sm" data-fz="1">A+</button></span></div><div class="row" style="flex-wrap:nowrap;margin-top:8px"><input id="sq" placeholder="اكتب كلمة أو جزء آية..." value="'+(R.q||"").replace(/"/g,"")+'"><button class="sm" data-sq="1">بحث</button></div><div class="sub" style="margin-top:4px">النجمة ★ بجانب الآية تعلّمها صعبة، وستظهر في اختبار «الآيات الصعبة».</div>';
+  if(R.q){
+    var rr=srch(R.q);
+    el+='<div class="sub" style="margin-top:6px">'+(rr.length?ar(rr.length)+(rr.length>=30?'+':'')+' نتيجة — تفيد في معرفة المتشابهات':'لا توجد نتائج')+'</div>';
+    rr.forEach(function(v){var s=Math.floor(v/1000),a=v%1000;el+='<div class="rng"><span><b>'+N[s-1]+' '+ar(a)+'</b><br><span class="sub">'+cut(T[v],10)+'</span></span><button class="ghost sm" data-gv="'+v+'">اذهب</button></div>'});
+  }
+  return el+'</div>';
+}
+function planList(){
+  var P=S.plan,o=[];if(!P)return o;
+  if(P.dir==="desc"){for(var s=P.s;s>=1;s--)for(var a=(s===P.s?P.a:1);a<=C[s-1];a++)o.push(s*1000+a)}
+  else o=ALL.slice(ALL.indexOf(P.s*1000+P.a));
+  return o;
+}
+function nstreak(){
+  var nh=S.nh||{},d=new Date(),c=0;
+  if(!(nh[dk(d)]>0))d.setDate(d.getDate()-1);
+  while(nh[dk(d)]>0){c++;d.setDate(d.getDate()-1)}
+  return c;
+}
+function planCard(){
+  var P=S.plan,el='<div class="card"><h2>🎯 خطة الحفظ الجديد</h2>';
+  if(!P){
+    return el+'<div class="sub">حدّد من أين تبدأ وكم آية تحفظ يوميًا، وسأرتّب لك ورد الحفظ وأتابع تقدّمك.</div><label class="sub" style="display:block;margin-top:8px">نقطة البداية (السورة والآية)</label><div class="row" style="flex-wrap:nowrap"><select id="pls">'+opts()+'</select><input id="pla" type="number" min="1" value="1" style="max-width:90px"></div><label class="sub" style="display:block;margin-top:8px">عدد الآيات يوميًا</label><select id="plp">'+[1,2,3,5,7,10,15,20].map(function(n){return '<option value="'+n+'"'+(n===5?' selected':'')+'>'+ar(n)+' آيات</option>'}).join("")+'</select><label class="sub" style="display:block;margin-top:8px">ترتيب الحفظ</label><select id="pld"><option value="fwd">بترتيب المصحف (للأمام)</option><option value="desc">من آخر المصحف (سورة تلو سورة للخلف)</option></select><button data-plstart="1" style="margin-top:12px;width:100%">ابدأ الخطة</button><div id="plmsg" class="sub" style="color:var(--bad)"></div></div>';
+  }
+  var L=planList(),nh=S.nh||{},t=dk(),dn=nh[t]||0,pp=S.pp||0,rem=L.length-pp;
+  if(rem<=0)return el+'<div class="ok">🎉 أتممت الخطة كاملة، ما شاء الله</div><button class="ghost sm" data-plreset="1">خطة جديدة</button></div>';
+  var p0=pp-dn,tr=ranges(L.slice(p0,p0+P.per)),tg=Math.min(P.per,L.length-p0);
+  el+='<div class="sub">هدف اليوم: '+ar(tg)+' آيات — تم حفظ '+ar(dn)+'</div><div class="bar" style="margin:6px 0"><i style="width:'+Math.min(100,Math.round(dn/tg*100))+'%"></i></div>';
+  tr.forEach(function(r){el+=rhtml(r)});
+  if(T){el+='<button class="ghost sm" data-plt="1">'+(S.pt?'إخفاء النص':'📖 عرض نص آيات اليوم')+'</button>';if(S.pt){var ow=S.wt;S.wt=2;el+=wirdText(tr);S.wt=ow}}
+  el+=dn>=tg?'<div class="ok">🌟 أتممت هدف اليوم</div>':'';
+  el+='<div class="row" style="flex-wrap:nowrap;margin-top:10px"><input id="pln" type="number" min="1" value="'+Math.max(1,tg-dn)+'" style="max-width:90px"><button data-pldo="1" style="flex:1">تم الحفظ ✅</button></div><div class="sub">اكتب عدد الآيات التي حفظتها فعلًا (تدخل تلقائيًا في ورد المراجعة)</div>';
+  if(S.plast&&S.plast.d===t)el+='<button class="ghost sm" data-plundo="1" style="margin-top:6px">تراجع عن آخر تسجيل</button>';
+  var days=Math.ceil(rem/P.per),fd=new Date();fd.setDate(fd.getDate()+(dn<tg?days-1:days));
+  el+='<div class="stats" style="margin-top:12px"><div class="stat"><b>'+ar(nstreak())+'</b><span>أيام متتالية</span></div><div class="stat"><b>'+ar(rem)+'</b><span>آية متبقية</span></div><div class="stat"><b>'+fd.toLocaleDateString("ar-EG",{day:"numeric",month:"short"})+'</b><span>الانتهاء المتوقع</span></div></div>';
+  el+='<div class="sub" style="margin-top:10px">آخر ١٤ يومًا (الرقم = آيات محفوظة)</div><div class="grid" style="margin-top:6px">';
+  var d=new Date();d.setDate(d.getDate()-13);
+  for(var i=0;i<14;i++){var k=dk(d),n=nh[k]||0;el+='<div class="day '+(n>=P.per?'g':n>0?'m':'')+(k===t?' t':'')+'">'+ar(n||d.getDate())+'</div>';d.setDate(d.getDate()+1)}
+  el+='</div><div class="row" style="margin-top:12px"><select id="plper" style="max-width:150px">'+[1,2,3,5,7,10,15,20].map(function(n){return '<option value="'+n+'"'+(n===P.per?' selected':'')+'>'+ar(n)+' آيات/يوم</option>'}).join("")+'</select><button class="ghost sm" data-plreset="1">إنهاء الخطة</button></div></div>';
+  return el;
+}
+function vExtra(){
+  var el=planCard()+'<div class="card"><h2>🌱 حفظ جديد</h2><div class="sub">سجّل ما حفظته، وسيدخل تلقائيًا في ورد المراجعة</div><div class="row" style="margin-top:8px;flex-wrap:nowrap"><select id="ns">'+opts()+'</select><input id="nf" type="number" min="1" placeholder="من" style="max-width:80px"><input id="nt" type="number" min="1" placeholder="إلى" style="max-width:80px"></div><button style="margin-top:10px" data-nlog="1">تسجيل الحفظ</button><div class="sub" id="nmsg" style="color:var(--bad)"></div>';
+  (S.nlog||[]).slice(-3).reverse().forEach(function(x){el+='<div class="sub">• '+x.d+' — '+rtxt(x)+'</div>'});
+  el+='</div>';
+  if(total()){
+    el+='<div class="card"><h2>🎯 اختبرني</h2><div class="sub">أعطيك نقطة بداية عشوائية من محفوظاتك، أكمل ٣ آيات من حفظك ثم تحقق</div><div id="qz" style="margin-top:8px"></div><button class="ghost" data-quiz="1" style="margin-top:8px">سؤال جديد</button><div class="sub" style="margin-top:6px">نتيجتك: '+ar(S.quiz.ok)+' صح من '+ar(S.quiz.n)+'</div></div>';
+  }
+  return el;
+}
+function vMem(){
+  var el='<h1>محفوظاتي</h1><div class="sub">اختر السور التي حفظتها كاملة</div><div class="card">';
+  el+='<div class="row" style="margin-bottom:8px"><button class="ghost sm" data-q="amma">جزء عمّ</button><button class="ghost sm" data-q="tab">تبارك + عمّ</button><button class="ghost sm" data-q="all">الكل</button><button class="ghost sm" data-q="none">مسح</button></div>';
+  el+='<input id="q" placeholder="ابحث عن سورة..." style="margin-bottom:8px"><div class="chips" id="chips">';
+  N.forEach(function(n,i){var id=i+1;el+='<button class="chip'+(S.mem.indexOf(id)>-1?' on':'')+'" data-s="'+id+'">'+n+'</button>'});
+  el+='</div><div class="sub" style="margin-top:8px">المحدد: '+ar(S.mem.length)+' سورة — '+ar(total())+' آية</div></div>';
+  el+='<div class="card"><h2>أو اختر بالأجزاء</h2><div class="chips">';
+  for(var j=1;j<=30;j++)el+='<button class="chip'+(S.juz.indexOf(j)>-1?' on':'')+'" data-j="'+j+'">الجزء '+ar(j)+'</button>';
+  el+='</div></div><div class="card"><h2>مقاطع من سور</h2><div class="sub">لو حافظ جزءًا من سورة فقط</div><div class="row" style="margin-top:8px;flex-wrap:nowrap"><select id="ps">'+opts()+'</select><input id="pf" type="number" min="1" placeholder="من" style="max-width:80px"><input id="pt" type="number" min="1" placeholder="إلى" style="max-width:80px"></div><button class="ghost sm" style="margin-top:8px" data-padd="1">إضافة المقطع</button><div id="pmsg" class="sub" style="color:var(--bad)"></div>';
+  S.parts.forEach(function(p,i){el+='<div class="rng"><b>'+rtxt(p)+'</b><button class="ghost sm" data-pdel="'+i+'">حذف</button></div>'});
+  el+='</div>';
+  el+='<div class="card"><h2>إعدادات الورد</h2><label class="sub">عدد الآيات يوميًا</label><select id="per">';
+  [5,10,15,20,30,40,50,75,100].forEach(function(v){el+='<option value="'+v+'"'+(S.per===v?' selected':'')+'>'+ar(v)+' آية</option>'});
+  el+='</select><label class="sub" style="display:block;margin-top:10px">ترتيب المراجعة</label><select id="ord"><option value="asc"'+(S.order==="asc"?' selected':'')+'>من الفاتحة إلى الناس</option><option value="desc"'+(S.order==="desc"?' selected':'')+'>من الناس إلى الفاتحة</option></select>';
+  el+='<p class="sub">ملاحظة: كل حوالي ٢٠ آية تقريبًا = صفحة واحدة من المصحف.</p></div>';
+  el+='<div class="card"><button class="ghost sm" data-reset="1">مسح كل البيانات</button></div>';
+  return el;
+}
+function vProg(){
+  var tot=total(),el='<h1>تقدّمي</h1>';
+  var days=Object.keys(S.hist).length,ay=0,g=0;
+  Object.keys(S.hist).forEach(function(k){ay+=S.hist[k].n||0;if(S.hist[k].r==="g")g++});
+  var cyc=tot?Math.round(S.ptr/tot*100):0;
+  el+='<div class="card"><h2>دورة المراجعة الحالية</h2><div class="bar"><i style="width:'+cyc+'%"></i></div><div class="sub" style="margin-top:6px">'+ar(cyc)+'٪ — الآية '+ar(S.ptr)+' من '+ar(tot)+'</div>';
+  el+='<div class="sub">دورات مكتملة: '+ar(S.cyc||0)+'</div>';
+  if(tot&&S.per)el+='<div class="sub">تكتمل الدورة بعد نحو '+ar(Math.ceil((tot-S.ptr)/S.per))+' يوم</div>';
+  el+='</div>';
+  el+='<div class="card"><div class="stats"><div class="stat"><b>'+ar(streak())+'</b><span>سلسلة حالية</span></div><div class="stat"><b>'+ar(days)+'</b><span>أيام الورد</span></div><div class="stat"><b>'+ar(ay)+'</b><span>آيات روجعت</span></div></div></div>';
+  el+='<div class="card"><h2>آخر ٣٥ يومًا</h2><div class="grid">';
+  var d=new Date();d.setDate(d.getDate()-34);
+  for(var i=0;i<35;i++){var k=dk(d),h=S.hist[k];
+    el+='<div class="day '+(h?h.r:'')+(k===dk()?' t':'')+'">'+ar(d.getDate())+'</div>';d.setDate(d.getDate()+1)}
+  el+='</div><div class="sub" style="margin-top:8px">🟩 ممتاز &nbsp; 🟨 جيد &nbsp; 🟥 ضعيف</div></div>';
+  el+='<div class="card"><h2>نسخة احتياطية</h2><div class="sub">بياناتك محفوظة في هذا المتصفح. صدّرها وخزّن النص، أو الصق نسخة قديمة ثم استورد</div><textarea id="bk" rows="3" style="width:100%;font-size:.75rem;direction:ltr;margin-top:6px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px"></textarea><div class="row" style="margin-top:8px"><button class="ghost sm" data-bk="out">تصدير</button><button class="ghost sm" data-bk="in">استيراد</button></div><div id="bmsg" class="sub" style="color:var(--bad)"></div></div>';
+  return el;
+}
+function render(){
+  var a=document.getElementById("app");
+  a.innerHTML=S.tab==="today"?vToday()+vExtra():S.tab==="mem"?vMem():S.tab==="exam"?vExam():S.tab==="read"?vRead():vProg()+strCard();
+  document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t===S.tab)});
+  clearInterval(TM);
+  if(S.tab==="read"){var rs=document.getElementById("rs");if(rs){rs.value=R.s;document.getElementById("rh").checked=R.hide}}
+  if(S.tab==="exam"){
+    var xs=document.getElementById("xs");
+    if(xs){xs.value=E.scope;document.getElementById("xn").value=E.n;document.getElementById("xm").value=E.mode;document.getElementById("xa").checked=E.auto}
+    if(E.phase==="run"){
+      TM=setInterval(function(){var t=document.getElementById("tm");if(t)t.textContent=ar(Math.floor((Date.now()-E.t0)/1000))+" ث"},1000);
+      if(E.auto&&!E.fb&&E.spoken!==E.i){E.spoken=E.i;say(E.qs[E.i].say)}
+    }
+  }
+}
+function go(t){S.tab=t;save();render();window.scrollTo(0,0)}
+function setMem(a){S.mem=a;S.ptr=0;S.weak=[];save();render()}
+document.querySelector("nav").addEventListener("click",function(e){var t=e.target.dataset.t;if(t)go(t)});
+document.getElementById("app").addEventListener("click",function(e){
+  var d=e.target.dataset;
+  if(d.go)go(d.go);
+  if(d.rate)done(d.rate);
+  if(d.undo)undo();
+  if(d.xstart){E.scope=val("xs");E.n=+val("xn");E.mode=val("xm");E.auto=document.getElementById("xa").checked;
+    var XL=scopeList();if(!XL.length){document.getElementById("xmsg").textContent="لا توجد آيات في هذا النطاق";return}
+    var xset={};XL.forEach(function(v){xset[v]=1});if(E.scope==="hard")XL.forEach(function(v){xset[v+1]=1;xset[v-1]=1});E.qs=[];
+    for(var xq=0;xq<E.n;xq++){var kd=E.mode==="oral"?(xq%2?"next":"rec"):E.mode==="know"?(xq%2?"ord":"cnt"):(Math.random()<0.65?(Math.random()<0.5?"rec":"next"):(Math.random()<0.5?"cnt":"ord"));E.qs.push(pickQ(xq,XL,xset))}
+    E.phase="run";E.i=0;E.score=0;E.miss=[];E.fb=null;E.t0=Date.now();E.spoken=-1;render()}
+  if(d.say)say(E.qs[E.i].say);
+  if(d.g!==undefined){var sc=+d.g;E.score+=sc;if(E.qs[E.i].s)bump(E.qs[E.i].s,sc===1?1:sc===0?-1:0);if(sc<1)E.miss.push(E.qs[E.i].r);xnext()}
+  if(d.pick!==undefined&&!E.fb){var qq=E.qs[E.i],pk=+d.pick;E.fb={pick:pk};if(pk===qq.ans)E.score++;if(qq.s)bump(qq.s,pk===qq.ans?1:-1);render()}
+  if(d.xnext)xnext();
+  if(d.xend){var an=E.i+(E.fb?1:0);if(!an){E.phase="setup";render()}else{E.n=an;xfinish()}}
+  if(d.xnew){E.phase="setup";render()}
+  if(e.target.classList&&e.target.classList.contains("hid"))e.target.classList.toggle("show");
+  if(d.rn){R.s=Math.min(114,Math.max(1,R.s+(+d.rn)));S.rd=R.s;render();window.scrollTo(0,0)}
+  if(d.rm){var ri=S.mem.indexOf(R.s);if(ri>-1)S.mem.splice(ri,1);else S.mem.push(R.s);S.ptr=0;S.weak=[];save();render()}
+  if(d.timp)impT(document.getElementById("ft").value);
+  if(d.wt){S.wt=((S.wt||0)+1)%3;save();render()}
+  if(d.plt){S.pt=!S.pt;save();render()}
+  if(d.plstart){var ps2=+val("pls"),pa2=+val("pla"),pm2=document.getElementById("plmsg");
+    if(!pa2||pa2<1||pa2>C[ps2-1]){pm2.textContent="رقم الآية غير صحيح — السورة فيها "+ar(C[ps2-1])+" آية";return}
+    S.plan={s:ps2,a:pa2,per:+val("plp"),dir:val("pld")};S.pp=0;S.nh=S.nh||{};save();render()}
+  if(d.pldo){var L2=planList(),pp2=S.pp||0,nn=Math.max(1,Math.min(+document.getElementById("pln").value||1,L2.length-pp2)),rg=ranges(L2.slice(pp2,pp2+nn)).map(function(r){return{s:r.s,from:r.from,to:r.to}});
+    rg.forEach(function(r){S.parts.push(r);S.nlog=(S.nlog||[]).concat([{s:r.s,from:r.from,to:r.to,d:dk()}]).slice(-60)});
+    S.nh=S.nh||{};S.nh[dk()]=(S.nh[dk()]||0)+nn;S.pp=pp2+nn;S.plast={d:dk(),n:nn,r:rg};save();render()}
+  if(d.plundo&&S.plast){var pl=S.plast,k2=pl.r.length;
+    if(JSON.stringify(S.parts.slice(-k2))===JSON.stringify(pl.r)){S.parts.splice(-k2,k2);S.nlog.splice(-k2,k2)}
+    S.nh[pl.d]=Math.max(0,(S.nh[pl.d]||0)-pl.n);S.pp=Math.max(0,(S.pp||0)-pl.n);S.plast=null;save();render()}
+  if(d.plreset){if(e.target.dataset.arm){S.plan=null;S.pp=0;S.plast=null;save();render()}else{e.target.dataset.arm="1";e.target.textContent="اضغط مرة أخرى للتأكيد"}}
+  if(d.hv){var hv=+d.hv,hl=(S.hard=S.hard||[]),hi=hl.indexOf(hv);if(hi>-1)hl.splice(hi,1);else hl.push(hv);e.target.textContent=hi>-1?"☆":"★";save()}
+  if(d.sq){R.q=document.getElementById("sq").value;render()}
+  if(d.gv){var gv=+d.gv;R.s=Math.floor(gv/1000);S.rd=R.s;R.q="";save();render();var ge=document.getElementById("ay"+gv);if(ge)ge.scrollIntoView({block:"center"})}
+  if(d.fz){S.fs=Math.min(2,Math.max(1,(S.fs||1.3)+0.15*(+d.fz)));document.documentElement.style.setProperty("--fz",S.fs+"rem");save()}
+  if(d.j){var j=+d.j,k=S.juz.indexOf(j);if(k>-1)S.juz.splice(k,1);else S.juz.push(j);S.ptr=0;S.weak=[];save();render()}
+  if(d.padd){var ps=+document.getElementById("ps").value,pf=+document.getElementById("pf").value,pt=+document.getElementById("pt").value||pf,pm=document.getElementById("pmsg");
+    if(!pf||pt<pf||pt>C[ps-1]){pm.textContent="تأكد من الأرقام — السورة فيها "+ar(C[ps-1])+" آية";return}
+    S.parts.push({s:ps,from:pf,to:pt});S.ptr=0;S.weak=[];save();render()}
+  if(d.pdel!==undefined){S.parts.splice(+d.pdel,1);S.ptr=0;S.weak=[];save();render()}
+  if(d.nlog){var ns=+document.getElementById("ns").value,nf=+document.getElementById("nf").value,nt=+document.getElementById("nt").value||nf,nm=document.getElementById("nmsg");
+    if(!nf||nt<nf||nt>C[ns-1]){nm.textContent="تأكد من الأرقام — السورة فيها "+ar(C[ns-1])+" آية";return}
+    S.parts.push({s:ns,from:nf,to:nt});S.nlog=(S.nlog||[]).concat([{s:ns,from:nf,to:nt,d:dk()}]);save();render()}
+  if(d.quiz){var f=flat(),v=f[Math.floor(Math.random()*f.length)],qs=Math.floor(v/1000),qa=v%1000;
+    document.getElementById("qz").innerHTML='<div class="rng"><b>اقرأ ٣ آيات بدءًا من سورة '+N[qs-1]+' آية '+ar(qa)+'</b><a href="https://quran.com/'+qs+':'+qa+'" target="_blank" rel="noopener">تحقق ↗</a></div><div class="rate" style="grid-template-columns:1fr 1fr"><button class="g" data-qa="1">قرأتها صح ✅</button><button class="w" data-qa="0">أخطأت</button></div>'}
+  if(d.qa!==undefined){S.quiz.n++;if(d.qa==="1")S.quiz.ok++;save();render()}
+  if(d.bk==="out"){document.getElementById("bk").value=JSON.stringify(S)}
+  if(d.bk==="in"){try{var o=JSON.parse(document.getElementById("bk").value);S=Object.assign(fresh(),o);S.tab="prog";save();render()}catch(x){document.getElementById("bmsg").textContent="النص غير صالح"}}
+  if(d.s){var id=+d.s,i=S.mem.indexOf(id);if(i>-1)S.mem.splice(i,1);else S.mem.push(id);S.ptr=0;S.weak=[];save();
+    var q=document.getElementById("q").value;render();var nq=document.getElementById("q");nq.value=q;filter(q)}
+  if(d.q){var r=[],i;
+    if(d.q==="amma")for(i=78;i<=114;i++)r.push(i);
+    if(d.q==="tab"){for(i=67;i<=114;i++)r.push(i)}
+    if(d.q==="all")for(i=1;i<=114;i++)r.push(i);
+    setMem(r)}
+  if(d.reset){if(e.target.dataset.arm){S=fresh();save();render()}else{e.target.dataset.arm="1";e.target.textContent="اضغط مرة أخرى لتأكيد المسح"}}
+});
+function filter(v){document.querySelectorAll("#chips .chip").forEach(function(c){c.style.display=N[+c.dataset.s-1].indexOf(v)>-1?"":"none"})}
+document.getElementById("app").addEventListener("input",function(e){
+  if(e.target.id==="q")filter(e.target.value.trim());
+});
+document.getElementById("app").addEventListener("change",function(e){
+  if(e.target.id==="per"){S.per=+e.target.value;save()}
+  if(e.target.id==="rs"){R.s=+e.target.value;S.rd=R.s;save();render()}
+  if(e.target.id==="plper"&&S.plan){S.plan.per=+e.target.value;save();render()}
+  if(e.target.id==="rh"){R.hide=e.target.checked;render()}
+  if(e.target.id==="fi"&&e.target.files[0]){var fr=new FileReader();fr.onload=function(){impT(fr.result)};fr.readAsText(e.target.files[0])}
+  if(e.target.id==="ord"){S.order=e.target.value;S.ptr=0;save()}
+});
+render();
+var TB=false;
+document.documentElement.style.setProperty("--fz",(S.fs||1.3)+"rem");
+(function(){
+  if(T)return;
+  try{
+    import("https://cdn.jsdelivr.net/npm/@muslims-community/quran@1.0.0/+esm").then(function(m){
+      var g=m.getAyah||(m.default&&m.default.getAyah);
+      if(!g)return;
+      var o={},n=0;
+      for(var s=1;s<=114;s++)for(var a=1;a<=C[s-1];a++){
+        var r=g(s,a),t=r&&(r.text||r.arabic);
+        if(t){if(a===1&&s!==1&&s!==9){var w=t.split(" ");if(w.length>4&&nz(w.slice(0,4).join(" "))==="بسم الله الرحمن الرحيم")t=w.slice(4).join(" ")}o[s*1000+a]=t;n++}}
+      if(n>=6200){T=o;TB=true;render()}
+    }).catch(function(){});
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
